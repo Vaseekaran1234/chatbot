@@ -1,4 +1,6 @@
-import (Page) from '@playwright/test';
-import { LoginPage } from "../pages/login";
+import { Page } from '@playwright/test';
+import { LoginPage } from './login';
 
-const loginPage = new LoginPage(page: Page);
+export function createLoginPage(page: Page) {
+  return new LoginPage(page);
+}
