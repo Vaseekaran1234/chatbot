@@ -1,29 +1,58 @@
-﻿import { Page } from '@playwright/test';
+﻿import { type TestInfo, Page } from '@playwright/test';
 
 export class LoginPage {
   constructor(private page: Page) {}
 
   async navigate() {
     await this.page.goto('https://rbot.co.in/');
-    await this.page.waitForSelector('#signin_button');
+    await this.page.getByRole('button', { name: /sign in/i }).waitFor({ state: 'visible', timeout: 60000 });
   }
 
   async fillEmail(email: string) {
-    await this.page.locator('#email1').fill(email);
+    await this.page.getByPlaceholder('Enter your email id').fill(email);
   }
 
   async fillPassword(password: string) {
-    await this.page.locator('#password1').fill(password);
+    await this.page.getByPlaceholder('Enter your password').fill(password);
   }
 
-  async clickSignIn() {
-    await this.page.locator('#signin_button').click();
+  async clickSignIn(testInfo?: TestInfo) {
+    const signInButton = this.page.getByRole('button', { name: /sign in/i });
+
+    await signInButton.click();
+
+    if (testInfo) {
+      const screenshot = await this.page.screenshot({ fullPage: true });
+      await testInfo.attach('after sign in', {
+        body: screenshot,
+        contentType: 'image/png',
+      });
+    }
   }
 
-  async login(email: string, password: string) {
+  async clickSignUpIfExists() {
+    const signUpButton = this.page
+      .locator('#signup_button, #signup, [id*="signup" i], [id*="sign_up" i], [href*="signup" i], [href*="sign-up" i]')
+      .or(this.page.getByRole('button', { name: /sign\s*up/i }))
+      .or(this.page.getByRole('link', { name: /sign\s*up/i }))
+      .first();
+
+    if (await signUpButton.count() === 0) {
+      return false;
+    }
+
+    await signUpButton.click();
+    return true;
+  }
+
+  errorMessage(text: string) {
+    return this.page.locator('span.error-message').and(this.page.getByText(text));
+  }
+
+  async login(email: string, password: string, testInfo?: TestInfo) {
     await this.navigate();
     await this.fillEmail(email);
     await this.fillPassword(password);
-    await this.clickSignIn();
+    await this.clickSignIn(testInfo);
   }
 }
