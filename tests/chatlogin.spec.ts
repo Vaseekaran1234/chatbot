@@ -27,7 +27,7 @@ test.describe.serial('RBot Login', () => {
 
     await loginPage.fillPassword('1234567890');
     await loginPage.clickSignIn(testInfo);
-
+  
     await expect(page.getByText('Email is required')).toBeVisible();
   });
 
@@ -64,7 +64,7 @@ test.describe.serial('RBot Login', () => {
     await loginPage.login(VALID_EMAIL, VALID_PASSWORD, testInfo);
 
     await expect(page).not.toHaveURL('https://rbot.co.in/');
-
+    
   });
   
 });
